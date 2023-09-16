@@ -1,0 +1,32 @@
+name: Build FRR RPM
+
+on:
+  push:
+    branches:
+      - main  # Adjust this branch name as needed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install build dependencies
+        run: |
+          sudo dnf install -y rpm-build make gcc autoconf automake libtool shtool
+
+      - name: Build RPM
+        run: |
+          cd frr
+          ./bootstrap.sh
+          ./configure
+          make rpm
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload RPM artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: frr-rpms
+          path: frr/packages/rpm/x86_64/RPMS/
